@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dictionary</title>
+    <style>
+
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 20px;
+      }
+      h1 {
+        text-align: center;
+      }
+      .search {
+        display: flex;
+        margin-bottom: 20px;
+      }
+      input {
+        flex: 1;
+        padding: 10px;
+        font-size: 16px;
+        box-shadow: 0 1px 2px black;
+    
+      }
+      button {
+        padding: 10px 20px;
+        font-size: 16px;
+        margin-left: 10px;
+        box-shadow: 0 2px 4px black;
+        cursor: pointer;
+      }
+      .definition {
+        background: white;
+        padding: 20px;
+        border-radius: 5px;
+      }
+      .error {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Dictionary</h1>
+    <div class="search">
+      <input type="text" id="wordInput" placeholder="Enter a word..." />
+      <button id="searchBtn">Search</button>
+    </div>
+    <div id="result"></div>
+
+    <script>
+    
+      const searchBtn = document.getElementById("searchBtn");
+      const wordInput = document.getElementById("wordInput");
+      const resultDiv = document.getElementById("result");
+
+   
+      searchBtn.addEventListener("click", () => {
+        const word = wordInput.value.trim();
+
+        fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
+          .then((response) => {
+            if (!response.ok) {
+              throw Error("Word not found");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            // Parse and display definitions
+            const definitions = data[0].meanings
+              .map((meaning) => {
+                const part = `<h3>${meaning.partOfSpeech}</h3>`;
+                const defs = meaning.definitions
+                  .map((d, i) => `<p>${i + 1}. ${d.definition}</p>`)
+                  .join("");
+                return part + defs;
+              })
+              .join("");
+
+            resultDiv.innerHTML = `<div class="definition">${definitions}</div>`;
+          })
+          .catch((err) => {
+            resultDiv.innerHTML = `<p class="error">${err.message}</p>`;
+          });
+      });
+      wordInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") searchBtn.click();
+      });
+    </script>
+  </body>
+</html>
